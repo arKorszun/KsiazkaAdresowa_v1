@@ -14,6 +14,8 @@ struct Adresat
     string imie,nazwisko,nrTelefonu,email,adres;
 };
 
+
+
 int zliczIloscLiniWPliku();
 
 void pobierzDaneDoWektora(vector <Adresat> &adresaci);
@@ -187,8 +189,14 @@ void dodajAdresataDoKsiazki (vector <Adresat> &adresaci)
     cin.clear();
     cin.sync();
     getline(cin,adres);
-
-    adresat.id = adresaci.back().id + 1;
+    if (adresaci.empty())
+    {
+        adresat.id = 1;
+    }
+    else
+    {
+        adresat.id = adresaci.back().id + 1;
+    }
     adresat.imie = zamienPierwszaLitereNaDuzaAPozostaleNaMale(imie);
     adresat.nazwisko = zamienPierwszaLitereNaDuzaAPozostaleNaMale(nazwisko);
     adresat.email = email;
