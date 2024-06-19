@@ -14,9 +14,19 @@ struct Adresat
     string imie,nazwisko,nrTelefonu,email,adres;
 };
 
-
+struct Uzytkownik
+{
+    int id;
+    string login, haslo;
+};
 
 int zliczIloscLiniWPliku();
+
+bool sprawdzCzyLoginJestWBazie (vector <Uzytkownik> uzytkownicy, string login);
+
+void rejestrujNowegoUzytkownika (vector <Uzytkownik> &uzytkownicy);
+
+int zalogujUzytkownika (vector <Uzytkownik> uzytkownicy);
 
 void pobierzDaneDoWektora(vector <Adresat> &adresaci);
 
@@ -42,63 +52,93 @@ int main()
 {
 
     vector <Adresat> adresaci;
-    pobierzDaneDoWektora(adresaci);
+    vector <Uzytkownik> uzytkownicy;
     char wybor;
+    int zalogowanyUzytkownik = 0;
 
     while(1)
     {
+        cout << "     >>> MENU GLOWNE <<<     " << endl;
+        cout << "-----------------------------" << endl;
+        cout << "1. Rejestracja" << endl;
+        cout << "2. Logowanie" << endl;
+        cout << "3. Zamknij program" << endl;
+        cout << "-----------------------------" << endl;
+        cout << "Twoj wybor: ";
+        cin >> wybor;
         system("cls");
-        cout << "----------KSIAZKA ADRESOWA----------" << endl << endl;
-        cout << "1. Dodaj Adresata do Ksiazki" << endl;
-        cout << "2. Wyszukaj Adresata w Ksiazce" << endl;
-        cout << "3. Wyswietl wszystkich Adresatow" << endl;
-        cout << "4. Usun adresata" << endl;
-        cout << "5. Edytuj adresata" << endl;
-        cout << "9. Zamknij program" << endl;
-        cin>>wybor;
 
         if (wybor == '1')
         {
-            dodajAdresataDoKsiazki(adresaci);
+            rejestrujNowegoUzytkownika(uzytkownicy);
+        }
+        else if (wybor == '2')
+        {
+            zalogowanyUzytkownik = zalogujUzytkownika(uzytkownicy);
+            while(1)
+            {
+                pobierzDaneDoWektora(adresaci);
+                system("cls");
+                cout << "----------MENU UZYTKOWNIKA----------" << endl << endl;
+                cout << "1. Dodaj Adresata do Ksiazki" << endl;
+                cout << "2. Wyszukaj Adresata w Ksiazce" << endl;
+                cout << "3. Wyswietl wszystkich Adresatow" << endl;
+                cout << "4. Usun adresata" << endl;
+                cout << "5. Edytuj adresata" << endl;
+                cout << "9. Powrot do Menu Glownego" << endl;
+                cin>>wybor;
 
-        }
-        if (wybor == '2')
-        {
-            system("cls");
-            cout<<"Wyszukiwanie"<<endl;
-            cout<<"1. Wyszukaj po nazwisku"<<endl;
-            cout<<"2. Wyszukaj po imieniu"<<endl;
-            cout<<"9. Wroc do menu glownego"<<endl;
-            cin>>wybor;
-            if (wybor == '1')
-            {
-                wyszukajAdresataPoNazwisku(adresaci);
+                if (wybor == '1')
+                {
+                    dodajAdresataDoKsiazki(adresaci);
+
+                }
+                if (wybor == '2')
+                {
+                    system("cls");
+                    cout<<"Wyszukiwanie"<<endl;
+                    cout<<"1. Wyszukaj po nazwisku"<<endl;
+                    cout<<"2. Wyszukaj po imieniu"<<endl;
+                    cout<<"9. Wroc do menu glownego"<<endl;
+                    cin>>wybor;
+                    if (wybor == '1')
+                    {
+                        wyszukajAdresataPoNazwisku(adresaci);
+                    }
+                    if (wybor == '2')
+                    {
+                        wyszukajAdresataPoImieniu(adresaci);
+                    }
+                    if (wybor == '9')
+                    {
+                        continue;
+                    }
+                }
+                if (wybor == '3')
+                {
+                    wyswietlWszystkichAdresatow(adresaci);
+                }
+                if (wybor == '4')
+                {
+                    usunAdresata(adresaci);
+                }
+                if (wybor == '5')
+                {
+                    edytujAdresata(adresaci);
+                }
+                if (wybor == '9')
+                {
+                    cout << "Do widzenia!" ;
+                    Sleep(500);
+                    system("cls");
+                    break;
+                }
             }
-            if (wybor == '2')
-            {
-                wyszukajAdresataPoImieniu(adresaci);
-            }
-            if (wybor == '9')
-            {
-                continue;
-            }
         }
-        if (wybor == '3')
+        else if (wybor == '3')
         {
-            wyswietlWszystkichAdresatow(adresaci);
-        }
-        if (wybor == '4')
-        {
-            usunAdresata(adresaci);
-        }
-        if (wybor == '5')
-        {
-            edytujAdresata(adresaci);
-        }
-        if (wybor == '9')
-        {
-            cout << "Do widzenia!";
-            Sleep(200);
+            cout << "Do widzenia!" ;
+            Sleep(500);
             exit(0);
         }
     }
@@ -115,6 +155,112 @@ int zliczIloscLiniWPliku()
         count++;
     plik.close();
     return count;
+}
+
+bool sprawdzCzyLoginJestWBazie (vector <Uzytkownik> uzytkownicy, string login)
+{
+    for (Uzytkownik uzytkownik : uzytkownicy )
+    {
+        if (uzytkownik.login == login )
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+void rejestrujNowegoUzytkownika (vector <Uzytkownik> &uzytkownicy)
+{
+    string login="", haslo="";
+    Uzytkownik uzytkownik;
+    bool czyLoginJestZajety = false;
+
+    do
+    {
+        cout << "------Rejestracja------" << endl << endl;
+        cout << "Podaj login: ";
+        cin >> login;
+        czyLoginJestZajety = sprawdzCzyLoginJestWBazie(uzytkownicy, login);
+        if (czyLoginJestZajety == false)
+        {
+            uzytkownik.login = login;
+            czyLoginJestZajety = false;
+        }
+        else
+        {
+            cout << "Podany login jest zajety, podaj inne dane!" << endl << endl;
+            Sleep(800);
+            system("cls");
+        }
+    }
+    while (czyLoginJestZajety == true);
+    cout << "Podaj haslo: ";
+    cin >> haslo;
+    uzytkownik.haslo = haslo;
+    if (uzytkownicy.empty())
+    {
+        uzytkownik.id = 1;
+    }
+    else
+    {
+        uzytkownik.id = uzytkownicy.back().id + 1;
+    }
+    uzytkownicy.push_back(uzytkownik);
+    cout << endl << "Rejestracja pomyslna!" << endl;
+    Sleep(800);
+    system("cls");
+}
+
+int zalogujUzytkownika (vector <Uzytkownik> uzytkownicy)
+{
+    string login="", haslo="";
+    int licznikProb = 3;
+    int zalogowanyUzytkownik;
+    bool czyLoginJestPoprawny = false;
+    bool czyDaneLogowaniaSaPoprawne = false;
+
+    do
+    {
+        cout << endl << "Podaj login: ";
+        cin >> login;
+        czyLoginJestPoprawny = sprawdzCzyLoginJestWBazie(uzytkownicy, login);
+        if (czyLoginJestPoprawny == false)
+        {
+            cout << "Brak takiego uzytkownika, podaj prawidlowy login" << endl;
+            Sleep(800);
+            system("cls");
+        }
+    }
+    while (czyLoginJestPoprawny == false);
+
+    do
+    {
+        cout << "Podaj haslo: ";
+        cin >> haslo;
+        for (Uzytkownik uzytkownik : uzytkownicy )
+        {
+            if (uzytkownik.login == login && uzytkownik.haslo == haslo)
+            {
+                czyDaneLogowaniaSaPoprawne = true;
+                zalogowanyUzytkownik = uzytkownik.id;
+                cout << endl << "Witaj " << login << "!" << endl;
+                Sleep(1000);
+                system("cls");
+                return zalogowanyUzytkownik;
+            }
+        }
+        if (czyDaneLogowaniaSaPoprawne == false)
+        {
+            licznikProb-=1;
+            cout << "Podales bledne haslo! Pozostala ilosc prob: " << licznikProb << endl;
+        }
+    }
+    while ( licznikProb != 0);
+    system("cls");
+    cout << endl << "Trzykrotnie podales bledne haslo! nastapi powrot do Menu Glownego" << endl;
+    Sleep(1000);
+    return 0;
+
 }
 
 void pobierzDaneDoWektora(vector <Adresat> &adresaci)
