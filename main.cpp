@@ -24,11 +24,15 @@ int zliczIloscLiniWPliku();
 
 bool sprawdzCzyLoginJestWBazie (vector <Uzytkownik> uzytkownicy, string login);
 
+void pobierzDaneUzytkownikowDoWektora(vector <Uzytkownik> &uzytkownicy);
+
+void zapiszUzytkownikaDoPliku(Uzytkownik uzytkownik);
+
 void rejestrujNowegoUzytkownika (vector <Uzytkownik> &uzytkownicy);
 
 int zalogujUzytkownika (vector <Uzytkownik> uzytkownicy);
 
-void pobierzDaneDoWektora(vector <Adresat> &adresaci);
+void pobierzDaneAdresatowDoWektora(vector <Adresat> &adresaci);
 
 string zamienPierwszaLitereNaDuzaAPozostaleNaMale(string tekst);
 
@@ -56,13 +60,15 @@ int main()
     char wybor;
     int zalogowanyUzytkownik = 0;
 
+    pobierzDaneUzytkownikowDoWektora(uzytkownicy);
+
     while(1)
     {
         cout << "     >>> MENU GLOWNE <<<     " << endl;
         cout << "-----------------------------" << endl;
         cout << "1. Rejestracja" << endl;
         cout << "2. Logowanie" << endl;
-        cout << "3. Zamknij program" << endl;
+        cout << "9. Zamknij program" << endl;
         cout << "-----------------------------" << endl;
         cout << "Twoj wybor: ";
         cin >> wybor;
@@ -77,7 +83,7 @@ int main()
             zalogowanyUzytkownik = zalogujUzytkownika(uzytkownicy);
             while(1)
             {
-                pobierzDaneDoWektora(adresaci);
+                pobierzDaneAdresatowDoWektora(adresaci);
                 system("cls");
                 cout << "----------MENU UZYTKOWNIKA----------" << endl << endl;
                 cout << "1. Dodaj Adresata do Ksiazki" << endl;
@@ -135,7 +141,7 @@ int main()
                 }
             }
         }
-        else if (wybor == '3')
+        else if (wybor == '9')
         {
             cout << "Do widzenia!" ;
             Sleep(500);
@@ -145,12 +151,12 @@ int main()
     return 0;
 }
 
-int zliczIloscLiniWPliku()
+int zliczIloscLiniWPliku(string nazwaPliku)
 {
     string line;
     int count = 0;
     fstream plik;
-    plik.open("ksiazkaAdresowa.txt",ios::in);
+    plik.open(nazwaPliku,ios::in);
     while(getline(plik, line))
         count++;
     plik.close();
@@ -167,6 +173,46 @@ bool sprawdzCzyLoginJestWBazie (vector <Uzytkownik> uzytkownicy, string login)
         }
     }
     return false;
+}
+
+void pobierzDaneUzytkownikowDoWektora(vector <Uzytkownik> &uzytkownicy)
+{
+    int iloscRekordow = 0;
+    Uzytkownik uzytkownik;
+    string pomocID;
+    string nazwaPliku = "uzytkownicy.txt";
+    iloscRekordow = (zliczIloscLiniWPliku(nazwaPliku));
+    fstream plik;
+    plik.open(nazwaPliku,ios::in);
+    if(plik.good() == false)
+    {
+        cout << "Plik nie istnieje!" << endl;
+    }
+    for (int i=0; i<iloscRekordow; i++)
+    {
+        getline(plik,pomocID,'|');
+        uzytkownik.id=stoi(pomocID);
+        getline(plik,uzytkownik.login,'|');
+        getline(plik,uzytkownik.haslo,'|');
+        uzytkownicy.push_back(uzytkownik);
+    }
+    plik.close();
+}
+
+void zapiszUzytkownikaDoPliku(Uzytkownik uzytkownik)
+{
+    fstream plik;
+    plik.open("uzytkownicy.txt",ios::out|ios::app);
+    if (plik.good() == true)
+    {
+        plik << uzytkownik.id << '|' << uzytkownik.login << '|' << uzytkownik.haslo << '|' << '\n';
+        plik.close();
+    }
+    else
+    {
+        cout << "Nie udalo sie otworzyc pliku, dane nie zostaly zapisane" << endl;
+        system("pause");
+    }
 }
 
 void rejestrujNowegoUzytkownika (vector <Uzytkownik> &uzytkownicy)
@@ -206,6 +252,7 @@ void rejestrujNowegoUzytkownika (vector <Uzytkownik> &uzytkownicy)
         uzytkownik.id = uzytkownicy.back().id + 1;
     }
     uzytkownicy.push_back(uzytkownik);
+    zapiszUzytkownikaDoPliku(uzytkownik);
     cout << endl << "Rejestracja pomyslna!" << endl;
     Sleep(800);
     system("cls");
@@ -263,14 +310,15 @@ int zalogujUzytkownika (vector <Uzytkownik> uzytkownicy)
 
 }
 
-void pobierzDaneDoWektora(vector <Adresat> &adresaci)
+void pobierzDaneAdresatowDoWektora(vector <Adresat> &adresaci)
 {
     int iloscRekordow = 0;
     Adresat adresat;
     string pomocID;
-    iloscRekordow = (zliczIloscLiniWPliku());
+    string nazwaPliku = "ksiazkaAdresowa.txt";
+    iloscRekordow = (zliczIloscLiniWPliku(nazwaPliku));
     fstream plik;
-    plik.open("ksiazkaAdresowa.txt",ios::in);
+    plik.open(nazwaPliku,ios::in);
     if(plik.good() == false)
     {
         cout << "Plik nie istnieje!" << endl;
