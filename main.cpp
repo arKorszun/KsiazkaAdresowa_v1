@@ -387,7 +387,7 @@ void pobierzDaneAdresatowDoWektora(vector <Adresat> &adresaci, int zalogowanyUzy
     string nazwaPliku = "Adresaci.txt";
     iloscRekordow = (zliczIloscLiniWPliku(nazwaPliku));
     fstream plik;
-    adresaci.clear(); // czysci wektor aby pobrac tylko adresatow uzytkownika
+    adresaci.clear(); // czysci wektor aby pobrac tylko adresatow zalogowanego uzytkownika
     plik.open(nazwaPliku,ios::in);
     if(plik.good() == false)
     {
@@ -538,13 +538,14 @@ void wyszukajAdresataPoNazwisku(vector <Adresat> adresaci)
         }
         if (czyAdresatIstnieje == false)
         {
-            cout << endl << "Nie znaleziono w Ksiazce nikogo o podanym nazwisku" << endl;
+            cout << endl << "Nie znaleziono w ksiazce nikogo o podanym nazwisku" << endl;
             Sleep(1000);
         }
     }
     else
     {
         cout << "Ksiazka adresowa jest pusta." << endl << endl;
+        Sleep(1000);
     }
     cout <<"Nacisnij dowolny klawisz aby wrocic do menu glownego" << endl;
     system("pause");
@@ -583,6 +584,7 @@ void wyszukajAdresataPoImieniu(vector <Adresat> adresaci)
     else
     {
         cout << "Ksiazka adresowa jest pusta." << endl << endl;
+        Sleep(1000);
     }
     cout<<"Nacisnij dowolny klawisz aby wrocic do menu glownego" << endl;
     system("pause");
@@ -600,12 +602,12 @@ void wyswietlWszystkichAdresatow(vector <Adresat> adresaci)
     {
         for (Adresat adresat : adresaci)
         {
-            cout << adresat.id << endl;
-            cout << adresat.imie << endl;
-            cout << adresat.nazwisko << endl;
-            cout << adresat.email << endl;
-            cout << adresat.nrTelefonu << endl;
-            cout << adresat.adres << endl << endl;
+            cout << "Id             " << adresat.id << endl;
+            cout << "Imie           " << adresat.imie << endl;
+            cout << "Nazwisko       " << adresat.nazwisko << endl;
+            cout << "Email          " << adresat.email << endl;
+            cout << "Nr.telefonu    " << adresat.nrTelefonu << endl;
+            cout << "Adres          " << adresat.adres << endl << endl;
         }
     }
     else
@@ -681,7 +683,7 @@ void usunAdresata(vector <Adresat> &adresaci)
                     if(itr == adresaci.end())break;
                 }
             }
-            nadpiszListeAdresatowWPliku (adresaci);
+            //nadpiszListeAdresatowWPliku (adresaci);
             cout << endl << "Kontakt pomyslnie usuniety!";
             Sleep(1000);
             break;
@@ -719,7 +721,9 @@ void edytujAdresata(vector <Adresat> &adresaci)
             }
         }
         system("cls");
-        cout << "Wybrano adresata o Id : " << idAdresataDoEdycji << ", jakie dane chcesz zmienic?" << endl;
+        cout << "Aktualne dane wybranego adresata" << endl;
+        wyswietlWybranegoAdresata (adresaci,idAdresataDoEdycji);
+        cout << endl <<"Co chcesz poprawic?" << endl;
         cout << "1. imie" << endl;
         cout << "2. nazwisko" << endl;
         cout << "3. numer telefonu" << endl;
@@ -797,5 +801,6 @@ void edytujAdresata(vector <Adresat> &adresaci)
     else
     {
         cout << "Ksiazka adresowa jest pusta." << endl << endl;
+        Sleep(1000);
     }
 }
