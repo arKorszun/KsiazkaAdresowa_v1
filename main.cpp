@@ -55,9 +55,11 @@ void wyswietlWszystkichAdresatow(vector <Adresat> adresaci);
 
 void nadpiszListeAdresatowWPlikuPoEdycjiAdresata (Adresat adresatPoEdycji, int idAdresataDoEdycji);
 
-bool czyAdresatIstniejeWBazie (vector <Adresat> adresaci, int idAdresata);
+bool sprawdzCzyAdresatIstniejeWBazie (vector <Adresat> adresaci, int idAdresata);
 
 void wyswietlWybranegoAdresata (vector <Adresat> adresaci, int idAdresata);
+
+void usunAdresataZPliku(int idAdresataDoUsuniecia);
 
 void usunAdresata(vector <Adresat> &adresaci);
 
@@ -203,6 +205,7 @@ void pobierzDaneUzytkownikowDoWektora(vector <Uzytkownik> &uzytkownicy)
     if(plik.good() == false)
     {
         cout << "Plik nie istnieje!" << endl;
+        Sleep(500);
     }
     for (int i=0; i<iloscRekordow; i++)
     {
@@ -650,11 +653,11 @@ void nadpiszListeAdresatowWPlikuPoEdycjiAdresata (Adresat adresatPoEdycji, int i
 
             if (idAdresataLiczba == idAdresataDoEdycji)
             {
-                plikTymczasowy << '\n' << adresatPoEdycji.id << '|' << adresatPoEdycji.idUzytkownika << '|' << adresatPoEdycji.imie << '|' << adresatPoEdycji.nazwisko << '|' << adresatPoEdycji.email << '|' << adresatPoEdycji.nrTelefonu << '|' << adresatPoEdycji.adres << '|';
+                plikTymczasowy << adresatPoEdycji.id << '|' << adresatPoEdycji.idUzytkownika << '|' << adresatPoEdycji.imie << '|' << adresatPoEdycji.nazwisko << '|' << adresatPoEdycji.email << '|' << adresatPoEdycji.nrTelefonu << '|' << adresatPoEdycji.adres << '|' << '\n';
             }
             else
             {
-                plikTymczasowy << idAdresata << '|' << idUzytkownika << '|' << imie << '|' << nazwisko << '|' << email << '|' << nrTelefonu << '|' << adres << '|';
+                plikTymczasowy << idAdresataLiczba << '|' << idUzytkownika << '|' << imie << '|' << nazwisko << '|' << email << '|' << nrTelefonu << '|' << adres << '|' << '\n';
             }
         }
         plikAdresaci.close();
@@ -670,7 +673,7 @@ void nadpiszListeAdresatowWPlikuPoEdycjiAdresata (Adresat adresatPoEdycji, int i
 
 }
 
-bool czyAdresatIstniejeWBazie (vector <Adresat> adresaci, int idAdresata)
+bool sprawdzCzyAdresatIstniejeWBazie (vector <Adresat> adresaci, int idAdresata)
 {
     for(vector <Adresat> :: iterator itr = adresaci.begin() ; itr != adresaci.end() ; itr++)
     {
@@ -686,8 +689,9 @@ bool czyAdresatIstniejeWBazie (vector <Adresat> adresaci, int idAdresata)
 void wyswietlWybranegoAdresata (vector <Adresat> adresaci, int idAdresata)
 {
     for (Adresat adresat : adresaci)
+    {
+        if (adresat.id == idAdresata)
         {
-            if (adresat.id == idAdresata)
             cout << endl;
             cout << "Id             " << adresat.id << endl;
             cout << "Imie           " << adresat.imie << endl;
@@ -696,6 +700,53 @@ void wyswietlWybranegoAdresata (vector <Adresat> adresaci, int idAdresata)
             cout << "Nr.telefonu    " << adresat.nrTelefonu << endl;
             cout << "Adres          " << adresat.adres << endl << endl;
         }
+
+    }
+}
+
+void usunAdresataZPliku(int idAdresataDoUsuniecia)
+{
+    string nazwaPliku = "Adresaci.txt";
+    string idAdresata, idUzytkownika, imie, nazwisko, email, nrTelefonu, adres, enter ;
+    int iloscRekordow, idAdresataLiczba;
+    fstream plikAdresaci, plikTymczasowy;
+
+    iloscRekordow = (zliczIloscLiniWPliku(nazwaPliku));
+    plikAdresaci.open("Adresaci.txt",ios::in);
+    plikTymczasowy.open("Adresaci_tymczasowy.txt",ios::out);
+    if (plikAdresaci.good() && plikTymczasowy.good())
+    {
+        for (int i=0; i<iloscRekordow; i++)
+        {
+            getline(plikAdresaci,idAdresata,'|');
+            getline(plikAdresaci,idUzytkownika,'|');
+            getline(plikAdresaci,imie,'|');
+            getline(plikAdresaci,nazwisko,'|');
+            getline(plikAdresaci,email,'|');
+            getline(plikAdresaci,nrTelefonu,'|');
+            getline(plikAdresaci,adres,'|');
+            idAdresataLiczba = stoi(idAdresata);
+
+            if (idAdresataLiczba == idAdresataDoUsuniecia)
+            {
+                continue;
+            }
+            else
+            {
+                plikTymczasowy << idAdresataLiczba << '|' << idUzytkownika << '|' << imie << '|' << nazwisko << '|' << email << '|' << nrTelefonu << '|' << adres << '|' << '\n';
+            }
+        }
+        plikAdresaci.close();
+        plikTymczasowy.close();
+    }
+    else
+    {
+        cout << endl << "Nie udalo sie otworzyc pliku, dane nie zostaly zapisane" << endl;
+        system("pause");
+    }
+    remove("Adresaci.txt");
+    rename("Adresaci_tymczasowy.txt","Adresaci.txt");
+
 }
 
 void usunAdresata(vector <Adresat> &adresaci)
@@ -711,14 +762,16 @@ void usunAdresata(vector <Adresat> &adresaci)
             system("cls");
             cout << "Podaj numer Id adresata do usuniecia: ";
             cin >> idAdresataDoUsuniecia;
-            czyWskazanyAdresatIstnieje = czyAdresatIstniejeWBazie(adresaci,idAdresataDoUsuniecia);
+            czyWskazanyAdresatIstnieje = sprawdzCzyAdresatIstniejeWBazie(adresaci,idAdresataDoUsuniecia);
             if (czyWskazanyAdresatIstnieje == false)
             {
                 cout << endl << "Brak w bazie adresata z podanym Id, podaj poprawny numer!";
                 Sleep(1000);
             }
         }
-        cout << "Czy napewno chcesz usunac adresata? Wcisnij klawisz t aby potwierdzic";
+        cout << "Wybrales adresata: " << endl;
+        wyswietlWybranegoAdresata(adresaci,idAdresataDoUsuniecia);
+        cout << "Czy napewno chcesz usunac tego adresata? Wcisnij klawisz t aby potwierdzic";
         wybor = getch();
         switch (wybor)
         {
@@ -729,10 +782,10 @@ void usunAdresata(vector <Adresat> &adresaci)
                 if (itr->id == idAdresataDoUsuniecia)
                 {
                     adresaci.erase(itr);
+                    usunAdresataZPliku(idAdresataDoUsuniecia);
                     if(itr == adresaci.end())break;
                 }
             }
-            //nadpiszListeAdresatowWPliku (adresaci);
             cout << endl << "Kontakt pomyslnie usuniety!";
             Sleep(1000);
             break;
@@ -763,7 +816,7 @@ void edytujAdresata(vector <Adresat> &adresaci)
             system("cls");
             cout << "Podaj numer Id adresata do edycji: ";
             cin >> idAdresataDoEdycji;
-            czyWskazanyAdresatIstnieje = czyAdresatIstniejeWBazie(adresaci,idAdresataDoEdycji);
+            czyWskazanyAdresatIstnieje = sprawdzCzyAdresatIstniejeWBazie(adresaci,idAdresataDoEdycji);
             if (czyWskazanyAdresatIstnieje == false)
             {
                 cout << endl << "Brak w bazie adresata z podanym Id, podaj poprawny numer!";
@@ -794,15 +847,6 @@ void edytujAdresata(vector <Adresat> &adresaci)
                 adresatPoEdycji.adres = itr-> adres;
 
                 cin >> wybor;
-
-                cout << endl << "Aktualne dane wybranego adresata" << endl;
-                cout << "Id             " << adresatPoEdycji.id << endl;
-                cout << "Imie           " << adresatPoEdycji.imie << endl;
-                cout << "Nazwisko       " << adresatPoEdycji.nazwisko << endl;
-                cout << "Email          " << adresatPoEdycji.email << endl;
-                cout << "Nr.telefonu    " << adresatPoEdycji.nrTelefonu << endl;
-                cout << "Adres          " << adresatPoEdycji.adres << endl << endl;
-
                 switch (wybor)
                 {
                 case '1':
