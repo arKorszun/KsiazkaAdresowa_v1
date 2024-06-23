@@ -32,6 +32,10 @@ void rejestrujNowegoUzytkownika (vector <Uzytkownik> &uzytkownicy);
 
 int zalogujUzytkownika (vector <Uzytkownik> uzytkownicy);
 
+void nadpiszUzytkownikowWPliku(vector <Uzytkownik> &uzytkownicy);
+
+void zmienHasloUzytkownika(vector <Uzytkownik> &uzytkownicy, int zalogowanyUzytkownik);
+
 void pobierzDaneAdresatowDoWektora(vector <Adresat> &adresaci, int zalogowanyUzytkownik);
 
 string zamienPierwszaLitereNaDuzaAPozostaleNaMale(string tekst);
@@ -134,6 +138,10 @@ int main()
                 if (wybor == '5')
                 {
                     edytujAdresata(adresaci);
+                }
+                if (wybor == '6')
+                {
+                    zmienHasloUzytkownika(uzytkownicy,zalogowanyUzytkownik);
                 }
                 if (wybor == '9')
                 {
@@ -313,6 +321,64 @@ int zalogujUzytkownika (vector <Uzytkownik> uzytkownicy)
 
 }
 
+void nadpiszUzytkownikowWPliku(vector <Uzytkownik> &uzytkownicy)
+{
+    fstream plik;
+    plik.open("Uzytkownicy.txt",ios::out);
+    if (plik.good() == true)
+    {
+        for (auto uzytkownik : uzytkownicy)
+            plik << uzytkownik.id<< '|' << uzytkownik.login << '|' << uzytkownik.haslo << '|' << '\n';
+        plik.close();
+    }
+    else
+    {
+        cout << endl << "Nie udalo sie otworzyc pliku, dane nie zostaly zapisane" << endl;
+        system("pause");
+    }
+}
+
+void zmienHasloUzytkownika(vector <Uzytkownik> &uzytkownicy, int zalogowanyUzytkownik)
+{
+    string haslo;
+    bool czyHasloJestPoprawne = false;
+
+    cout << "Podaj stare haslo: ";
+    cin >> haslo;
+    for (Uzytkownik uzytkownik : uzytkownicy )
+    {
+        if (uzytkownik.id == zalogowanyUzytkownik && uzytkownik.haslo == haslo)
+        {
+            czyHasloJestPoprawne = true;
+        }
+    }
+    if (czyHasloJestPoprawne)
+    {
+        cout << "Podaj nowe haslo: ";
+        cin >> haslo;
+
+
+        for(vector <Uzytkownik> :: iterator itr = uzytkownicy.begin() ; itr != uzytkownicy.end() ; itr++)
+        {
+            if (itr->id == zalogowanyUzytkownik)
+            {
+                itr->haslo = haslo;
+            }
+        }
+        nadpiszUzytkownikowWPliku(uzytkownicy);
+        cout << "Haslo pomyslnie zmienione!";
+        Sleep(800);
+    }
+    else
+    {
+        cout << "Haslo niepoprawne!" << endl;
+        cout << "Powrot do Menu Uzytkownika" << endl;
+        Sleep(800);
+    }
+
+
+}
+
 void pobierzDaneAdresatowDoWektora(vector <Adresat> &adresaci, int zalogowanyUzytkownik)
 {
     int iloscRekordow = 0, idUzytkownikaLiczba = 0;
@@ -394,7 +460,7 @@ int pobierzIdOstatniegoAdresataZPliku ()
     }
     plik.close();
 
-    for (int i = 0;i < pobranaWartosc.length(); i++)
+    for (size_t i = 0; i < pobranaWartosc.length(); i++)
     {
         if (pobranaWartosc[i] == '|') break;
         idOstatniegoAdresataTekst+=pobranaWartosc[i];
