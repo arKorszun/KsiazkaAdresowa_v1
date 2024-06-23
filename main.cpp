@@ -10,8 +10,8 @@ using namespace std;
 
 struct Adresat
 {
-    int id;
-    string imie,nazwisko,nrTelefonu,email,adres;
+    int id, idUzytkownika;
+    string imie, nazwisko, nrTelefonu, email, adres;
 };
 
 struct Uzytkownik
@@ -32,13 +32,15 @@ void rejestrujNowegoUzytkownika (vector <Uzytkownik> &uzytkownicy);
 
 int zalogujUzytkownika (vector <Uzytkownik> uzytkownicy);
 
-void pobierzDaneAdresatowDoWektora(vector <Adresat> &adresaci);
+void pobierzDaneAdresatowDoWektora(vector <Adresat> &adresaci, int zalogowanyUzytkownik);
 
 string zamienPierwszaLitereNaDuzaAPozostaleNaMale(string tekst);
 
-void dodajAdresataDoKsiazki (vector <Adresat> &adresaci);
+void dodajAdresataDoKsiazki (vector <Adresat> &adresaci, int zalogowanyUzytkownik);
 
 void przeslijJednegoAdresataDoPliku(Adresat adresat);
+
+int pobierzIdOstatniegoAdresataZPliku ();
 
 void wyszukajAdresataPoNazwisku(vector <Adresat> adresaci);
 
@@ -83,7 +85,7 @@ int main()
             zalogowanyUzytkownik = zalogujUzytkownika(uzytkownicy);
             while(1)
             {
-                pobierzDaneAdresatowDoWektora(adresaci);
+                pobierzDaneAdresatowDoWektora(adresaci, zalogowanyUzytkownik);
                 system("cls");
                 cout << "----------MENU UZYTKOWNIKA----------" << endl << endl;
                 cout << "1. Dodaj Adresata do Ksiazki" << endl;
@@ -91,12 +93,13 @@ int main()
                 cout << "3. Wyswietl wszystkich Adresatow" << endl;
                 cout << "4. Usun adresata" << endl;
                 cout << "5. Edytuj adresata" << endl;
-                cout << "9. Powrot do Menu Glownego" << endl;
+                cout << "6. Zmien haslo" << endl;
+                cout << "9. Wyloguj sie" << endl;
                 cin>>wybor;
 
                 if (wybor == '1')
                 {
-                    dodajAdresataDoKsiazki(adresaci);
+                    dodajAdresataDoKsiazki(adresaci, zalogowanyUzytkownik);
 
                 }
                 if (wybor == '2')
@@ -180,7 +183,7 @@ void pobierzDaneUzytkownikowDoWektora(vector <Uzytkownik> &uzytkownicy)
     int iloscRekordow = 0;
     Uzytkownik uzytkownik;
     string pomocID;
-    string nazwaPliku = "uzytkownicy.txt";
+    string nazwaPliku = "Uzytkownicy.txt";
     iloscRekordow = (zliczIloscLiniWPliku(nazwaPliku));
     fstream plik;
     plik.open(nazwaPliku,ios::in);
@@ -202,7 +205,7 @@ void pobierzDaneUzytkownikowDoWektora(vector <Uzytkownik> &uzytkownicy)
 void zapiszUzytkownikaDoPliku(Uzytkownik uzytkownik)
 {
     fstream plik;
-    plik.open("uzytkownicy.txt",ios::out|ios::app);
+    plik.open("Uzytkownicy.txt",ios::out|ios::app);
     if (plik.good() == true)
     {
         plik << uzytkownik.id << '|' << uzytkownik.login << '|' << uzytkownik.haslo << '|' << '\n';
@@ -310,14 +313,15 @@ int zalogujUzytkownika (vector <Uzytkownik> uzytkownicy)
 
 }
 
-void pobierzDaneAdresatowDoWektora(vector <Adresat> &adresaci)
+void pobierzDaneAdresatowDoWektora(vector <Adresat> &adresaci, int zalogowanyUzytkownik)
 {
-    int iloscRekordow = 0;
+    int iloscRekordow = 0, idUzytkownikaLiczba = 0;
     Adresat adresat;
-    string pomocID;
-    string nazwaPliku = "ksiazkaAdresowa.txt";
+    string idAdresata, idUzytkownika, imie, nazwisko, email, nrTelefonu, adres ;
+    string nazwaPliku = "Adresaci.txt";
     iloscRekordow = (zliczIloscLiniWPliku(nazwaPliku));
     fstream plik;
+    adresaci.clear(); // czysci wektor aby pobrac tylko adresatow uzytkownika
     plik.open(nazwaPliku,ios::in);
     if(plik.good() == false)
     {
@@ -325,14 +329,26 @@ void pobierzDaneAdresatowDoWektora(vector <Adresat> &adresaci)
     }
     for (int i=0; i<iloscRekordow; i++)
     {
-        getline(plik,pomocID,'|');
-        adresat.id=stoi(pomocID);
-        getline(plik,adresat.imie,'|');
-        getline(plik,adresat.nazwisko,'|');
-        getline(plik,adresat.email,'|');
-        getline(plik,adresat.nrTelefonu,'|');
-        getline(plik,adresat.adres,'|');
-        adresaci.push_back(adresat);
+        getline(plik,idAdresata,'|');
+        getline(plik,idUzytkownika,'|');
+        getline(plik,imie,'|');
+        getline(plik,nazwisko,'|');
+        getline(plik,email,'|');
+        getline(plik,nrTelefonu,'|');
+        getline(plik,adres,'|');
+        idUzytkownikaLiczba = stoi(idUzytkownika);
+
+        if (idUzytkownikaLiczba == zalogowanyUzytkownik)
+        {
+            adresat.id = stoi(idAdresata);
+            adresat.idUzytkownika = idUzytkownikaLiczba;
+            adresat.imie = imie;
+            adresat.nazwisko = nazwisko;
+            adresat.email = email;
+            adresat.nrTelefonu = nrTelefonu;
+            adresat.adres = adres;
+            adresaci.push_back(adresat);
+        }
     }
     plik.close();
 }
@@ -350,10 +366,10 @@ string zamienPierwszaLitereNaDuzaAPozostaleNaMale(string tekst)
 void przeslijJednegoAdresataDoPliku(Adresat adresat)
 {
     fstream plik;
-    plik.open("ksiazkaAdresowa.txt",ios::out|ios::app);
+    plik.open("Adresaci.txt",ios::out|ios::app);
     if (plik.good() == true)
     {
-        plik << adresat.id << '|' << adresat.imie << '|' << adresat.nazwisko << '|' << adresat.email << '|' << adresat.nrTelefonu << '|' << adresat.adres << '|'  << '\n';
+        plik << adresat.id << '|' << adresat.idUzytkownika << '|' << adresat.imie << '|' << adresat.nazwisko << '|' << adresat.email << '|' << adresat.nrTelefonu << '|' << adresat.adres << '|'  << '\n';
         plik.close();
     }
     else
@@ -363,7 +379,31 @@ void przeslijJednegoAdresataDoPliku(Adresat adresat)
     }
 }
 
-void dodajAdresataDoKsiazki (vector <Adresat> &adresaci)
+int pobierzIdOstatniegoAdresataZPliku ()
+{
+    int nrOstatniejLini = 0;
+    string pobranaWartosc = "", idOstatniegoAdresataTekst = "";
+    int idOstatniegoAdresata;
+    string nazwaPliku = "Adresaci.txt";
+    nrOstatniejLini = zliczIloscLiniWPliku (nazwaPliku);
+    fstream plik;
+    plik.open(nazwaPliku,ios::in);
+    for (int i = 0; i < nrOstatniejLini; i++)
+    {
+        getline(plik, pobranaWartosc);
+    }
+    plik.close();
+
+    for (int i = 0;i < pobranaWartosc.length(); i++)
+    {
+        if (pobranaWartosc[i] == '|') break;
+        idOstatniegoAdresataTekst+=pobranaWartosc[i];
+    }
+    idOstatniegoAdresata = stoi(idOstatniegoAdresataTekst);
+    return idOstatniegoAdresata;
+}
+
+void dodajAdresataDoKsiazki (vector <Adresat> &adresaci, int zalogowanyUzytkownik)
 {
     string imie,nazwisko,nrTelefonu,email,adres;
     Adresat adresat;
@@ -389,8 +429,10 @@ void dodajAdresataDoKsiazki (vector <Adresat> &adresaci)
     }
     else
     {
-        adresat.id = adresaci.back().id + 1;
+        int idOstatniegoAdresata = pobierzIdOstatniegoAdresataZPliku();
+        adresat.id = idOstatniegoAdresata + 1;
     }
+    adresat.idUzytkownika = zalogowanyUzytkownik;
     adresat.imie = zamienPierwszaLitereNaDuzaAPozostaleNaMale(imie);
     adresat.nazwisko = zamienPierwszaLitereNaDuzaAPozostaleNaMale(nazwisko);
     adresat.email = email;
@@ -512,7 +554,7 @@ void wyswietlWszystkichAdresatow(vector <Adresat> adresaci)
 void nadpiszListeAdresatowWPliku (vector <Adresat> &adresaci)
 {
     fstream plik;
-    plik.open("ksiazkaAdresowa.txt",ios::out);
+    plik.open("Adresaci.txt",ios::out);
     if (plik.good() == true)
     {
         for (auto adresat : adresaci)
