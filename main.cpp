@@ -202,19 +202,25 @@ void pobierzDaneUzytkownikowDoWektora(vector <Uzytkownik> &uzytkownicy)
     iloscRekordow = (zliczIloscLiniWPliku(nazwaPliku));
     fstream plik;
     plik.open(nazwaPliku,ios::in);
-    if(plik.good() == false)
+    if (plik.good() == true)
     {
-        cout << "Plik nie istnieje!" << endl;
-        Sleep(500);
+        for (int i=0; i<iloscRekordow; i++)
+        {
+            getline(plik,pomocID,'|');
+            uzytkownik.id=stoi(pomocID);
+            getline(plik,uzytkownik.login,'|');
+            getline(plik,uzytkownik.haslo,'|');
+            uzytkownicy.push_back(uzytkownik);
+        }
     }
-    for (int i=0; i<iloscRekordow; i++)
+    else
     {
-        getline(plik,pomocID,'|');
-        uzytkownik.id=stoi(pomocID);
-        getline(plik,uzytkownik.login,'|');
-        getline(plik,uzytkownik.haslo,'|');
-        uzytkownicy.push_back(uzytkownik);
+        cout << "Utworzono plik Uzytkownicy.txt" << endl;
+        Sleep(300);
+        system("cls");
     }
+
+
     plik.close();
 }
 
@@ -229,8 +235,9 @@ void zapiszUzytkownikaDoPliku(Uzytkownik uzytkownik)
     }
     else
     {
-        cout << "Nie udalo sie otworzyc pliku, dane nie zostaly zapisane" << endl;
-        system("pause");
+        cout << "Utworzono plik Uzytkownicy.txt" << endl;
+        Sleep(300);
+        system("cls");
     }
 }
 
@@ -397,32 +404,39 @@ void pobierzDaneAdresatowDoWektora(vector <Adresat> &adresaci, int zalogowanyUzy
     fstream plik;
     adresaci.clear(); // czysci wektor aby pobrac tylko adresatow zalogowanego uzytkownika
     plik.open(nazwaPliku,ios::in);
-    if(plik.good() == false)
+    if (plik.good() == true)
     {
-        cout << "Plik nie istnieje!" << endl;
-    }
-    for (int i=0; i<iloscRekordow; i++)
-    {
-        getline(plik,idAdresata,'|');
-        getline(plik,idUzytkownika,'|');
-        getline(plik,imie,'|');
-        getline(plik,nazwisko,'|');
-        getline(plik,email,'|');
-        getline(plik,nrTelefonu,'|');
-        getline(plik,adres,'|');
-        idUzytkownikaLiczba = stoi(idUzytkownika);
 
-        if (idUzytkownikaLiczba == zalogowanyUzytkownik)
+        for (int i=0; i<iloscRekordow; i++)
         {
-            adresat.id = stoi(idAdresata);
-            adresat.idUzytkownika = idUzytkownikaLiczba;
-            adresat.imie = imie;
-            adresat.nazwisko = nazwisko;
-            adresat.email = email;
-            adresat.nrTelefonu = nrTelefonu;
-            adresat.adres = adres;
-            adresaci.push_back(adresat);
+            getline(plik,idAdresata,'|');
+            getline(plik,idUzytkownika,'|');
+            getline(plik,imie,'|');
+            getline(plik,nazwisko,'|');
+            getline(plik,email,'|');
+            getline(plik,nrTelefonu,'|');
+            getline(plik,adres,'|');
+            idUzytkownikaLiczba = stoi(idUzytkownika);
+
+            if (idUzytkownikaLiczba == zalogowanyUzytkownik)
+            {
+                adresat.id = stoi(idAdresata);
+                adresat.idUzytkownika = idUzytkownikaLiczba;
+                adresat.imie = imie;
+                adresat.nazwisko = nazwisko;
+                adresat.email = email;
+                adresat.nrTelefonu = nrTelefonu;
+                adresat.adres = adres;
+                adresaci.push_back(adresat);
+            }
         }
+    }
+    else
+    {
+        cout << "Utworzono plik Adresaci.txt" << endl;
+        Sleep(300);
+        system("cls");
+
     }
     plik.close();
 }
@@ -481,6 +495,8 @@ void dodajAdresataDoKsiazki (vector <Adresat> &adresaci, int zalogowanyUzytkowni
 {
     string imie,nazwisko,nrTelefonu,email,adres;
     Adresat adresat;
+    fstream plik;
+    plik.open("Adresaci.txt",ios::in);
 
     system("cls");
     cout << "Dodawanie nowej osoby do ksiazki"<<endl;
@@ -497,7 +513,7 @@ void dodajAdresataDoKsiazki (vector <Adresat> &adresaci, int zalogowanyUzytkowni
     cin.clear();
     cin.sync();
     getline(cin,adres);
-    if (adresaci.empty())
+    if (plik.good() == false)
     {
         adresat.id = 1;
     }
@@ -506,6 +522,7 @@ void dodajAdresataDoKsiazki (vector <Adresat> &adresaci, int zalogowanyUzytkowni
         int idOstatniegoAdresata = pobierzIdOstatniegoAdresataZPliku();
         adresat.id = idOstatniegoAdresata + 1;
     }
+    plik.close();
     adresat.idUzytkownika = zalogowanyUzytkownik;
     adresat.imie = zamienPierwszaLitereNaDuzaAPozostaleNaMale(imie);
     adresat.nazwisko = zamienPierwszaLitereNaDuzaAPozostaleNaMale(nazwisko);
@@ -535,12 +552,12 @@ void wyszukajAdresataPoNazwisku(vector <Adresat> adresaci)
         {
             if (adresat.nazwisko == szukaneNazwisko)
             {
-                cout << adresat.id << endl;
-                cout << adresat.imie << endl;
-                cout << adresat.nazwisko << endl;
-                cout << adresat.email << endl;
-                cout << adresat.nrTelefonu << endl;
-                cout << adresat.adres << endl << endl;
+            cout << "Id             " << adresat.id << endl;
+            cout << "Imie           " << adresat.imie << endl;
+            cout << "Nazwisko       " << adresat.nazwisko << endl;
+            cout << "Email          " << adresat.email << endl;
+            cout << "Nr.telefonu    " << adresat.nrTelefonu << endl;
+            cout << "Adres          " << adresat.adres << endl << endl;
                 czyAdresatIstnieje = true;
             }
         }
@@ -574,12 +591,12 @@ void wyszukajAdresataPoImieniu(vector <Adresat> adresaci)
         {
             if (adresat.imie == szukaneImie)
             {
-                cout << adresat.id << endl;
-                cout << adresat.imie << endl;
-                cout << adresat.nazwisko << endl;
-                cout << adresat.email << endl;
-                cout << adresat.nrTelefonu << endl;
-                cout << adresat.adres << endl << endl;
+            cout << "Id             " << adresat.id << endl;
+            cout << "Imie           " << adresat.imie << endl;
+            cout << "Nazwisko       " << adresat.nazwisko << endl;
+            cout << "Email          " << adresat.email << endl;
+            cout << "Nr.telefonu    " << adresat.nrTelefonu << endl;
+            cout << "Adres          " << adresat.adres << endl << endl;
                 czyAdresatIstnieje = true;
             }
         }
@@ -638,7 +655,7 @@ void nadpiszListeAdresatowWPlikuPoEdycjiAdresata (Adresat adresatPoEdycji, int i
     iloscRekordow = (zliczIloscLiniWPliku(nazwaPliku));
     plikAdresaci.open("Adresaci.txt",ios::in);
     plikTymczasowy.open("Adresaci_tymczasowy.txt",ios::out);
-    if (plikAdresaci.good() == true && plikTymczasowy.good())
+    if (plikAdresaci.good() && plikTymczasowy.good())
     {
         for (int i=0; i<iloscRekordow; i++)
         {
